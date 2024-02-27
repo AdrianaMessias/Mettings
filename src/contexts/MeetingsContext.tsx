@@ -5,7 +5,8 @@ export interface Meeting {
   title: string;
   data: string;
   hora: string;
-  imagemPath: string;
+  imagem?: string;
+  imagemPath?: string;
   emails: string[];
 }
 
@@ -40,6 +41,7 @@ export const MeetingsProvider: React.FC<MeetingContextProviderProps> = ({ childr
     title: '',
     data: '',
     hora: '',
+    imagem: '', 
     imagemPath: '',
     emails: [],
   });
@@ -69,6 +71,7 @@ export const MeetingsProvider: React.FC<MeetingContextProviderProps> = ({ childr
       title: '',
       data: '',
       hora: '',
+      imagem: '', 
       imagemPath: '',
       emails: [],
     });
