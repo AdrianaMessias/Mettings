@@ -13,6 +13,7 @@ export const Form = () => {
     handleTitleChange,
     handleHoraChange,
     handleEmailInputChange,
+    handleImagemChange,
     handleAddEmail,
     handleRemoveEmail,
     handleSubmit,
@@ -52,6 +53,7 @@ export const Form = () => {
             name="imagem" 
             id="imagem" 
             accept="image/*"
+            onChange={handleImagemChange}
             className="block w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
           />
           <div className="flex">
