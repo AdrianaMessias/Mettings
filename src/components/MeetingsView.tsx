@@ -15,23 +15,44 @@ export const MeetingsView: React.FC = () => {
     handleInputChange,
   } = useMeetingsContext();
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageDataUrl = reader.result as string;
+        handleInputChange({ target: { value: imageDataUrl } } as React.ChangeEvent<HTMLInputElement>, 'imagem');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <div className="max-w-lg mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-4">Lista de Reuniões</h2>
-      <div className="mt-4">
-        <Link to="/meetings" className="text-blue-500 font-bold mr-2">Ver Reuniões Cadastradas</Link>
-        <Link to="/" className="text-blue-500 font-bold">Voltar para a Página Inicial</Link>
+    <div className=" flex-col items-center bg-gray-900 h-screen mx-auto justify-center p-5">
+      <h2 className="text-2xl text-white font-bold mb-4">Lista de Reuniões</h2>
+      <div className="mt-4 mb-4">
+        <Link to="/" className="w-40 mr-1 inline-block text-center border border-solid border-blue-500 text-blue-500 font-bold px-4 py-2 rounded">Home</Link>
+        <Link to="/form" className="w-40 inline-block text-center border border-solid border-blue-500 text-blue-500 font-bold mr-2 px-4 py-2 rounded">Nova Reunião</Link>
       </div>
       <ul>
+        <li className="border-b border-gray-200 py-2 flex sm:flex-row font-semibold">
+          <div className="w-1/5 text-white">Título</div>
+          <div className="w-1/5 text-white">Data</div>
+          <div className="w-1/5 text-white">Hora</div>
+          <div className="w-1/5 text-white">Imagem</div>
+          <div className="w-1/5 text-white">E-mails</div>
+          <div className="w-1/5 text-white text-center">Editar</div>
+          <div className="w-1/5 text-white text-center">Excluir</div>
+        </li>
         {meetings.map((meeting, index) => (
-          <li key={index} className="border-b border-gray-200 py-4 flex flex-col sm:flex-row items-start sm:items-center">
+          <li key={index} className={`border-b border-gray-200 py-4 flex flex-col sm:flex-row justify-center items-center`}>
             {editableIndex === index ? (
               <>
                 <input
                   type="text"
                   value={editedMeeting.title}
                   onChange={(e) => handleInputChange(e, 'title')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 max-w-28"
                   placeholder="Título"
                 />
                 <input
@@ -46,24 +67,30 @@ export const MeetingsView: React.FC = () => {
                   onChange={(e) => handleInputChange(e, 'hora')}
                   className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
-                <input
-                  type="text"
-                  value={editedMeeting.imagem}
-                  onChange={(e) => handleInputChange(e, 'imagem')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="URL da Imagem"
-                />
+                <div className="flex items-center w-1/5">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                    id="input-image"
+                  />
+                  <label htmlFor="input-image" className="cursor-pointer mr-2 underline text-blue-500">Escolher outra imagem</label>
+                  {editedMeeting.imagem && (
+                    <img src={editedMeeting.imagem} alt="Imagem da reunião" className="max-w-xs h-12" />
+                  )}
+                </div>
                 <input
                   type="text"
                   value={editedMeeting.emails.join(', ')}
                   onChange={(e) => handleInputChange(e, 'emails')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-64"
                   placeholder="E-mails"
                 />
                 <div>
                   <button
                     onClick={handleSave}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 mr-2 rounded"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-2 rounded"
                   >
                     Salvar
                   </button>
@@ -71,32 +98,25 @@ export const MeetingsView: React.FC = () => {
               </>
             ) : (
               <>
-                <div className="mb-2 sm:mb-0">
-                  <strong>Título:</strong> {meeting.title}
+                <div className="w-9/12 text-white">{meeting.title}</div>
+                <div className="w-9/12 text-white">{meeting.data}</div>
+                <div className="w-9/12 text-white">{meeting.hora}</div>
+                <div className="w-9/12 text-white">
+                  <img src={meeting.imagem} alt="Imagem da reunião" width={50} height={50}/>
                 </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>Data:</strong> {meeting.data}
-                </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>Hora:</strong> {meeting.hora}
-                </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>Imagem:</strong> 
-                  <img src={meeting.imagem} alt="Imagem da reunião" width={150} height={100} className="max-w-xs mx-auto mt-2" />
-                </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>E-mails:</strong> {Array.isArray(meeting.emails) ? meeting.emails.join(', ') : ''}
-                </div>
-                <div>
+                <div className="w-9/12 text-white">{Array.isArray(meeting.emails) ? meeting.emails.join(', ') : ''}</div>
+                <div className="w-9/12 text-center text-white">
                   <button
                     onClick={() => handleEdit(index)}
-                    className="text-blue-500 font-bold py-2 px-4 mr-2 rounded"
+                    className="text-blue-500 font-bold"
                   >
                     <FaEdit className="inline-block mr-1" />
                   </button>
+                </div>
+                <div className='w-9/12 justify-center text-center'>
                   <button
                     onClick={() => handleDelete(index)}
-                    className="text-red-500 font-bold py-2 px-4 rounded"
+                    className="text-red-500 font-bold"
                   >
                     <FaTrash className="inline-block mr-1" />
                   </button>

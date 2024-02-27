@@ -5,7 +5,7 @@ export interface Meeting {
   title: string;
   data: string;
   hora: string;
-  imagem?: string; // Tornando a propriedade imagem opcional
+  imagem?: string;
   imagemPath?: string;
   emails: string[];
 }
@@ -54,7 +54,6 @@ export const MeetingsProvider: React.FC<MeetingContextProviderProps> = ({ childr
   const handleEdit = (index: number) => {
     setEditableIndex(index);
     setEditedMeeting(meetings[index]);
-    toast.success('Reunião editada com sucesso!');
   };
 
   const handleSave = () => {
