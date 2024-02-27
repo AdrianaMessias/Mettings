@@ -1,11 +1,99 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import { useMeetingsContext } from '../contexts/MeetingsContext';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { toast } from 'react-toastify';
 
-export const MeetingsView: React.FC = () => {
-  const {
+export interface Meeting {
+  title: string;
+  data: string;
+  hora: string;
+  imagem?: string;
+  imagemPath?: string;
+  emails: string[];
+}
+
+interface MeetingsContextType {
+  meetings: Meeting[];
+  editableIndex: number | null;
+  editedMeeting: Meeting;
+  handleEdit: (index: number) => void;
+  handleSave: () => void;
+  handleDelete: (index: number) => void;
+  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>, key: string) => void;
+}
+
+interface MeetingContextProviderProps {
+  children: React.ReactNode;
+}
+
+const MeetingsContext = createContext<MeetingsContextType | undefined>(undefined);
+
+export const useMeetingsContext = () => {
+  const context = useContext(MeetingsContext);
+  if (!context) {
+    throw new Error('useMeetingsContext must be used within a MeetingsProvider');
+  }
+  return context;
+};
+
+export const MeetingsProvider: React.FC<MeetingContextProviderProps> = ({ children }) => {
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [editableIndex, setEditableIndex] = useState<number | null>(null);
+  const [editedMeeting, setEditedMeeting] = useState<Meeting>({
+    title: '',
+    data: '',
+    hora: '',
+    imagem: '', 
+    imagemPath: '',
+    emails: [],
+  });
+
+  useEffect(() => {
+    const storedMeetings = localStorage.getItem('meetingData');
+    if (storedMeetings) {
+      setMeetings(JSON.parse(storedMeetings));
+    }
+  }, []);
+
+  const handleEdit = (index: number) => {
+    setEditableIndex(index);
+    setEditedMeeting(meetings[index]);
+    toast.success('Reunião editada com sucesso!');
+  };
+
+  const handleSave = () => {
+    if (editableIndex === null) return;
+
+    const updatedMeetings = [...meetings];
+    updatedMeetings[editableIndex] = editedMeeting;
+    setMeetings(updatedMeetings);
+    localStorage.setItem('meetingData', JSON.stringify(updatedMeetings));
+    setEditableIndex(null);
+    setEditedMeeting({
+      title: '',
+      data: '',
+      hora: '',
+      imagem: '', 
+      imagemPath: '',
+      emails: [],
+    });
+    toast.success('Reunião salva com sucesso!');
+  };
+
+  const handleDelete = (index: number) => {
+    const confirmDelete = window.confirm('Tem certeza que deseja excluir esta reunião?');
+    if (confirmDelete) {
+      const updatedMeetings = [...meetings];
+      updatedMeetings.splice(index, 1);
+      setMeetings(updatedMeetings);
+      localStorage.setItem('meetingData', JSON.stringify(updatedMeetings));
+      toast.success('Reunião excluída com sucesso!');
+    }
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, key: string) => {
+    setEditedMeeting({ ...editedMeeting, [key]: event.target.value });
+  };
+
+  const contextValue: MeetingsContextType = {
     meetings,
     editableIndex,
     editedMeeting,
@@ -13,100 +101,11 @@ export const MeetingsView: React.FC = () => {
     handleSave,
     handleDelete,
     handleInputChange,
-  } = useMeetingsContext();
+  };
 
   return (
-    <div className="max-w-lg mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-4">Lista de Reuniões</h2>
-      <div className="mt-4">
-        <Link to="/form" className="text-blue-500 font-bold mr-2">Cadastrar Reuniões</Link>
-        <Link to="/" className="text-blue-500 font-bold">Voltar para a Página Inicial</Link>
-      </div>
-      <ul>
-        {meetings.map((meeting, index) => (
-          <li key={index} className="border-b border-gray-200 py-4 flex flex-col sm:flex-row items-start sm:items-center">
-            {editableIndex === index ? (
-              <>
-                <input
-                  type="text"
-                  value={editedMeeting.title}
-                  onChange={(e) => handleInputChange(e, 'title')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Título"
-                />
-                <input
-                  type="date"
-                  value={editedMeeting.data}
-                  onChange={(e) => handleInputChange(e, 'data')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                <input
-                  type="time"
-                  value={editedMeeting.hora}
-                  onChange={(e) => handleInputChange(e, 'hora')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                <input
-                  type="text"
-                  value={editedMeeting.imagem}
-                  onChange={(e) => handleInputChange(e, 'imagem')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="URL da Imagem"
-                />
-                <input
-                  type="text"
-                  value={editedMeeting.emails.join(', ')}
-                  onChange={(e) => handleInputChange(e, 'emails')}
-                  className="mb-2 sm:mb-0 mr-4 px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="E-mails"
-                />
-                <div>
-                  <button
-                    onClick={handleSave}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 mr-2 rounded"
-                  >
-                    Salvar
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mb-2 sm:mb-0">
-                  <strong>Título:</strong> {meeting.title}
-                </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>Data:</strong> {meeting.data}
-                </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>Hora:</strong> {meeting.hora}
-                </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>Imagem:</strong> 
-                  <img src={meeting.imagem} alt="Imagem da reunião" width={150} height={100} className="max-w-xs mx-auto mt-2" />
-                </div>
-                <div className="ml-4 mb-2 sm:mb-0">
-                  <strong>E-mails:</strong> {meeting.emails.join(', ')}
-                </div>
-                <div>
-                  <button
-                    onClick={() => handleEdit(index)}
-                    className="text-blue-500 font-bold py-2 px-4 mr-2 rounded"
-                  >
-                    <FaEdit className="inline-block mr-1" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(index)}
-                    className="text-red-500 font-bold py-2 px-4 rounded"
-                  >
-                    <FaTrash className="inline-block mr-1" />
-                  </button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-      <ToastContainer />
-    </div>
+    <MeetingsContext.Provider value={contextValue}>
+      {children}
+    </MeetingsContext.Provider>
   );
 };
