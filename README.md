@@ -22,7 +22,7 @@ Siga estas etapas para configurar e executar o projeto em sua máquina local:
 
 Acesse a aplicação local através de: [http://127.0.0.1:5173/](http://127.0.0.1:5173/)
 
-Você também pode acessar a aplicação online através deste link: [Meeting App](https://meeting-tan.vercel.app/)
+Você também pode acessar a aplicação online através deste link: [Meeting App](https://mettings.vercel.app/)
 
 ## Screenshots
 
